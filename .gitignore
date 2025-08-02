@@ -3,3 +3,4 @@ __pycache__
 artifacts
 data
 .DS_Store
+faiss_indexes

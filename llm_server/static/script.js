@@ -34,4 +34,16 @@ async function search() {
   }
 }
 
-healthCheck();  // On load
+async function refreshIndexes() {
+  const resultBox = document.getElementById("result");
+  resultBox.textContent = "🔄 Rebuilding indexes...";
+  try {
+    const res = await fetch("/api/refresh_indexes", { method: "POST" });
+    const data = await res.json();
+    resultBox.textContent = `✅ Indexes refreshed: ${data.types.join(", ")}`;
+  } catch (e) {
+    resultBox.textContent = "❌ Failed to refresh indexes.";
+  }
+}
+
+healthCheck();
