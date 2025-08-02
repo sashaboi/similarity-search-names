@@ -2,11 +2,13 @@ import os
 import faiss
 import numpy as np
 import pickle
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from sentence_transformers import SentenceTransformer
 from typing import Dict, List
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+api = APIRouter()
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 BASE_DATA_DIR = "./data"
@@ -90,26 +92,39 @@ def search_index(name_type: str, query: str):
 
     return sorted(all_results, key=lambda x: -x["max_confidence_score"])
 
-@app.get("/search_fname")
+@api.get("/search_fname")
 async def search_fname(query: str):
     return {
         "query": query,
         "results": search_index("fname", query)
     }
 
-@app.get("/search_lname")
+@api.get("/search_lname")
 async def search_lname(query: str):
     return {
         "query": query,
         "results": search_index("lname", query)
     }
 
-@app.get("/search_fullname")
+@api.get("/search_fullname")
 async def search_fullname(query: str):
     return {
         "query": query,
         "results": search_index("full_name", query)
     }
+    
+@api.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+@api.post("/refresh_indexes")
+async def refresh_indexes():
+    load_all_indexes()
+    return {"status": "reindexed", "types": NAME_TYPES}
+
+app.include_router(api, prefix="/api")
+app.mount("/", StaticFiles(directory="llm_server/static", html=True), name="static")
+
 
 if __name__ == "__main__":
     import uvicorn
