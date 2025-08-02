@@ -106,7 +106,7 @@ async def search_lname(query: str):
         "results": search_index("lname", query)
     }
 
-@api.get("/search_fullname")
+@api.get("/search_full_name")
 async def search_fullname(query: str):
     return {
         "query": query,
